@@ -2,8 +2,11 @@ using UnityEngine;
 
 namespace OMAAC
 {
+    using KarpysDev.KarpysUtils;
+
     public class PlayerController : MonoBehaviour
     {
+        [SerializeField] private Rigidbody m_Rigidbody = null;
         [SerializeField] private Transform m_Forward = null;
         [SerializeField] private float m_Acceleration = 0;
         [SerializeField] private float m_Deceleration = 0;
@@ -19,15 +22,15 @@ namespace OMAAC
         [SerializeField] private float m_InputTimeDelay = 0;
         [SerializeField] private float m_JumpForce = 0;
         [SerializeField] private float m_Gravity = 0;
-            
+        
         private Vector2 m_Input = Vector2.zero;
         private bool m_IsGrounded = false;
         private Vector3 m_HorizontalVelocity = Vector3.zero;
         private float m_VerticalVelocity = 0;
-            
+        
         //Clock//
         private Timer m_JumpRequestTimer = null;
-            
+        
         private bool CanJump => m_IsGrounded && !m_JumpRequestTimer.IsDone && m_VerticalVelocity <= 0;
 
         private void Awake()
@@ -41,7 +44,7 @@ namespace OMAAC
             PlayerInput();
 
             m_IsGrounded = Physics.Raycast(m_StartGroundCheck.position, Vector3.down, m_GroundCheckHeight, m_GroundMask);
-               
+           
             HorizontalMovement();
             VerticalMovement();
             JumpCheck();
@@ -50,7 +53,7 @@ namespace OMAAC
             velocity.magnitude.Log("Horizontal Velocity");
             velocity.y = m_VerticalVelocity;
             velocity.y.Log("Vertical Velocity");
-            transform.position += velocity * Time.deltaTime;
+            m_Rigidbody.velocity = velocity;
         }
 
         private void PlayerInput()
@@ -63,7 +66,7 @@ namespace OMAAC
                 m_JumpRequestTimer.Launch();
             }
         }
-            
+        
         private void HorizontalMovement()
         {
             Vector3 newHorizontalVelocity = m_Forward.forward * m_Input.y + m_Forward.right * m_Input.x;
@@ -71,7 +74,7 @@ namespace OMAAC
             if (newHorizontalVelocity != Vector3.zero)
             {
                 m_HorizontalVelocity += newHorizontalVelocity.normalized * (m_Acceleration * Time.deltaTime);
-                    
+                
                 if (m_HorizontalVelocity.magnitude > m_MaxSpeed)
                 {
                     m_HorizontalVelocity = m_HorizontalVelocity.normalized * m_MaxSpeed;
@@ -84,7 +87,7 @@ namespace OMAAC
                 StopCheck();
             }
         }
-            
+        
         private void VerticalMovement()
         {
             JumpCheck();
@@ -114,7 +117,7 @@ namespace OMAAC
                 Jump();
             }
         }
-            
+        
         private void Jump()
         {
             m_VerticalVelocity = m_JumpForce;
